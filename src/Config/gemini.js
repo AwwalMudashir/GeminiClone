@@ -7,12 +7,15 @@ import {
   HarmBlockThreshold,
 } from "@google/generative-ai"
 
-const MODEL_NAME = "gemini-1.0-pro";
-const API_KEY = "AIzaSyAfzqHhW9P4ZLikOlOWJl8pX70S60wGifg";
+const MODEL_NAME = "gemini-3.5-flash";
+const API_KEY = import.meta.env.VITE_API_KEY;
+
+if (!API_KEY) {
+  throw new Error("Missing VITE_API_KEY in environment variables. Add it to .env.local at the project root.");
+}
 
 async function runChat(prompt) {
   const genAI = new GoogleGenerativeAI(API_KEY);
-  const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
   const generationConfig = {
     temperature: 0.9,
@@ -40,14 +43,13 @@ async function runChat(prompt) {
     },
   ];
 
-  const chat = model.startChat({
+  const model = genAI.getGenerativeModel({
+    model: MODEL_NAME,
     generationConfig,
     safetySettings,
-    history: [
-    ],
   });
 
-  const result = await chat.sendMessage(prompt);
+  const result = await model.generateContent(prompt);
   const response = result.response;
   console.log(response.text());
   return response.text();
